@@ -1,0 +1,183 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" href="https://cdn.static.runoob.com/libs/bootstrap/3.3.7/css/bootstrap.min.css">  
+<link rel="stylesheet" type="text/css" href="kkpager_orange.css">
+<style type="text/css">
+#table thead{ background: #f9f9f9; color: #000; }
+#table td{
+	width: 30%;
+	text-align: center;
+	border: 1px solid #eee;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  margin: 100px auto;
+  background-color: #333;
+ 
+  border-radius: 100%; 
+  -webkit-animation: scaleout 1.0s infinite ease-in-out;
+  animation: scaleout 1.0s infinite ease-in-out;
+}
+ 
+@-webkit-keyframes scaleout {
+  0% { -webkit-transform: scale(0.0) }
+  100% {
+    -webkit-transform: scale(1.0);
+    opacity: 0;
+  }
+}
+ 
+@keyframes scaleout {
+  0% {
+    transform: scale(0.0);
+    -webkit-transform: scale(0.0);
+  } 100% {
+    transform: scale(1.0);
+    -webkit-transform: scale(1.0);
+    opacity: 0;
+  }
+}
+
+</style>
+
+
+</head>
+
+<body>
+  	
+<div class="container-fluid">
+	<table id="table" class="table table-responsive">
+		<thead>
+			<td>序号</td>
+			<td>姓名</td>
+			<td>邮箱</td>
+		</thead>
+		<tbody>
+			
+		</tbody>
+	</table>
+
+	<div id="kkpager"></div>
+
+</div>
+
+
+<script src="http://cdn.bootcss.com/jquery/2.2.4/jquery.min.js"></script>
+<script type="text/javascript" src="kkpager.min.js"></script>
+<script type="text/javascript">
+var curPage = 1; //当前页码
+var total; //总记录数
+var pageSize;//每页显示条数
+var totalPage;//总页数
+
+function getData(page){
+	$.ajax({
+		type: 'POST',
+		url: 'pages.php',
+		data: {'pageNum':page-1},
+		dataType:'json',
+		beforeSend:function (){
+			$("tbody").append("<div class=\"spinner\"></div>")
+		},
+		success:function (data){
+		
+			$("tbody").empty();
+			total = data.total; //总记录数
+			pageSize = data.pageSize; //每页显示条数
+			curPage = page; //当前页
+			totalPage = data.totalPage; //总页数
+
+
+			var html="";
+			$.each(data.list,function (i,elem){
+				html+="<tr>";
+				
+				html+="<td>"+data.list[i]["id"].toUpperCase()+"</td><td>"+data.list[i]["firstname"].toUpperCase()+"</td><td>"+data.list[i]["email"].toUpperCase()+"</td>";
+				
+				html+="</tr>";
+			})
+
+			$("tbody").append(html);
+
+
+			$("#table tr").each(function (i,elem){
+				if( $(elem).index() %2 ){
+					$(elem).css("background-color","#f9f9f9");
+				}
+
+			})
+
+
+
+			//addddddddddddddddddddddddddd
+
+
+			getPageBar()
+
+
+			//addddddddddddddddddddddddddd
+
+		},
+
+		error:function(){
+			alert("数据加载失败");
+		}
+
+	})
+}
+
+
+function getParameter(name) { 
+				var reg = new RegExp("(^|&)"+ name +"=([^&]*)(&|$)"); 
+				var r = window.location.search.substr(1).match(reg); 
+				if (r!=null) return unescape(r[2]); return null;
+			}
+
+			//init
+			
+			function getPageBar(){
+				var pageNo = getParameter('pno');
+				if(!pageNo){
+					pageNo = 1;
+				}
+				//生成分页
+				//有些参数是可选的，比如lang，若不传有默认值
+				kkpager.generPageHtml({
+					pno : curPage, //当前页
+					
+					total : totalPage,//总页码
+					
+					mode : 'click',//默认值是link，可选link或者click
+					click : function(n){
+						// alert(n)
+						$("tbody").empty();
+						getData(n)
+						// do something
+						//手动选中按钮
+						this.selectPage(n);
+						return false;
+					}
+
+				});
+			}
+
+
+
+
+$(function(){
+	getData(1);
+
+
+
+});
+</script>
+
+
+
+</body>
+</html>
