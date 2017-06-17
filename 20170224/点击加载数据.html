@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+	<title>Document</title>
+	<link href="https://cdn.bootcss.com/bootstrap/3.3.0/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<div class="container-fluid">
+	<p></p>
+	<div class="table-responsive">
+		<table class="table text-center">
+			<thead>
+				<tr>
+					<th class="text-center">ID</th>
+					<th class="text-center">FirstName</th>
+					<th class="text-center">LastName</th>
+					<th class="text-center">Email</th>
+				</tr>
+			</thead>
+			<tbody></tbody>
+		</table>
+	</div>
+
+<div class="row">
+	<div class="col-sm-6 col-xs-6 col-xs-offset-3 col-sm-offset-3">
+		<a class="btn btn-info btn-sm center-block">加载更多</a>
+		<p></p>
+	</div>
+</div>
+	
+</div>
+<script src="http://cdn.bootcss.com/jquery/2.2.4/jquery.min.js"></script>
+
+<script type="text/javascript">
+
+	var i=0;//当前页
+	var html="";
+	var totalPage;//总页数
+
+$(".btn").on("click",FnAjax);
+
+
+//首先页面初始化的时候加载一页的数据
+$.ajax({
+	url: 'pages.php',
+	type: 'get',
+	dataType: 'json',
+	data: {pageNum: 0}
+})
+.done(function(data) {
+
+	if(data.list){
+	
+		totalPage=data.totalPage;//总页数
+
+		if(i<=totalPage-1){
+			html="";//清空之前的字符串
+			$.each(data.list, function (i,elem){
+				html+=
+						"<tr>"+"<td>"+data.list[i]["id"]+"</td>"+
+						"<td>"+data.list[i]["firstname"]+"</td>"+
+						"<td>"+data.list[i]["lastname"]+"</td>"+
+						"<td>"+data.list[i]["email"]+"</td></tr>";
+			});
+			$("tbody").append(html);
+			
+		}else{
+			$(".btn").text("加载完毕")
+		};
+
+		i++;
+	}else{
+		$(".btn").text("没有更多")
+	}
+	
+
+})
+.fail(function() {
+	//console.log("error");
+})
+.always(function() {
+	//console.log("complete");
+});
+
+
+
+
+///////////////////////////////////////
+	function FnAjax(){
+		
+		if(i<=totalPage-1){
+			
+			$.ajax({
+				url: 'pages.php',
+				type: 'get',
+				dataType: 'json',
+				data: {pageNum: i},
+				beforeSend: function ( xhr ) {
+				    $(".btn").text("loading..").attr("disabled",true)
+				}
+			})
+			.done(function(data) {
+				$(".btn").text("加载更多").removeAttr("disabled");
+				totalPage=data.totalPage;//总页数
+
+				
+					html="";//清空之前的字符串
+					$.each(data.list, function (i,elem){
+						html+=
+								"<tr>"+"<td>"+data.list[i]["id"]+"</td>"+
+								"<td>"+data.list[i]["firstname"]+"</td>"+
+								"<td>"+data.list[i]["lastname"]+"</td>"+
+								"<td>"+data.list[i]["email"]+"</td></tr>";
+					});
+					$("tbody").append(html);
+					i++;	
+					
+			})
+			.fail(function() {
+				//console.log("error");
+			})
+			.always(function() {
+				//console.log("complete");
+				
+				
+			});	
+		}else{
+			$(".btn").text("加载完毕")
+		}
+	}
+
+
+	
+
+</script>
+</body>
+</html>
