@@ -36,6 +36,7 @@
 <script type="text/javascript">
 
 	var i=0;//当前页
+	var num=0;
 	var html="";
 	var totalPage;//总页数
 	var loading = false;
@@ -44,8 +45,9 @@
 $(window).scroll(function (){
 	w1=$(window).scrollTop()+$(window).height();
 	w2=$(document).height();
-	if(w1+200>=w2){console.log("ok")
+	if(w1+200>=w2){
 		if(!loading){
+			console.log("50行滚动"+loading);
 			FnAjax();
 		}
 	};
@@ -53,46 +55,7 @@ $(window).scroll(function (){
 });
 
 //首先页面初始化的时候加载一页的数据
-$.ajax({
-	url: 'pages.php',
-	type: 'get',
-	dataType: 'json',
-	data: {pageNum: 0}
-})
-.done(function(data) {
-
-	if(data.list){
-	
-		totalPage=data.totalPage;//总页数
-
-		if(i<=totalPage-1){
-			html="";//清空之前的字符串
-			$.each(data.list, function (i,elem){
-				html+=
-						"<tr>"+"<td>"+data.list[i]["id"]+"</td>"+
-						"<td>"+data.list[i]["firstname"]+"</td>"+
-						"<td>"+data.list[i]["lastname"]+"</td>"+
-						"<td>"+data.list[i]["email"]+"</td></tr>";
-			});
-			$("tbody").append(html);
-			
-		}else{
-			$(".btn").text("加载完毕")
-		};
-
-		i++;
-	}else{
-		$(".btn").text("没有更多")
-	}
-	
-
-})
-.fail(function() {
-	//console.log("error");
-})
-.always(function() {
-	//console.log("complete");
-});
+againFn(num);
 
 
 
@@ -100,9 +63,23 @@ $.ajax({
 ///////////////////////////////////////
 function FnAjax(){
 	loading = true;
+	console.log("执行ajax前----"+loading);
 	if(i<=totalPage-1){
 		
-		$.ajax({
+		/////////////////复用开始
+		againFn(num);
+		/////////////////复用结束
+
+	}else{
+		$(".btn").text("加载完毕")
+	}
+}
+
+
+
+//////复用函数
+function againFn(num){
+	$.ajax({
 			url: 'pages.php',
 			type: 'get',
 			dataType: 'json',
@@ -111,9 +88,9 @@ function FnAjax(){
 			    $(".btn").text("loading..")
 			}
 		})
-
 		.done(function(data) {
 			loading = false;
+			console.log("这里是ajax----"+loading);
 			$(".btn").text("加载更多")
 			totalPage=data.totalPage;//总页数
 
@@ -128,7 +105,8 @@ function FnAjax(){
 							"<td>"+data.list[i]["email"]+"</td></tr>";
 				});
 				$("tbody").append(html);
-				i++;	
+				i++;
+				num=i;	
 				
 		})
 		.fail(function() {
@@ -136,15 +114,8 @@ function FnAjax(){
 		})
 		.always(function() {
 			//console.log("complete");
-			
-			
 		});	
-	}else{
-		$(".btn").text("加载完毕")
-	}
 }
-
-
 	
 
 </script>
